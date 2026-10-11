@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b4f5b">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>مكتبة محاضرات تقنيات المختبرات الطبية — المرحلة الثانية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#f4f7f9;--card:#fff;--ink:#16303d;--mute:#5d7280;--brand:#0f6b7a;--brand2:#0b4f5b;--line:#dbe4e9;--ok:#1b7f4b;--err:#b3261e;--soft:#e4f1f3}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1a20;--card:#17262e;--ink:#e6f0f4;--mute:#93a9b5;--brand:#4fb3c3;--brand2:#7cc9d6;--line:#2a3d48;--soft:#1d3640}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,Tahoma,Arial,sans-serif;line-height:1.6;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{background:var(--brand2);color:#fff;padding:18px 16px}
+header .in,main{max-width:960px;margin:auto}
+header h1{margin:0;font-size:1.25rem}
+header p{margin:2px 0 0;opacity:.85;font-size:.9rem}
+main{padding:16px}
+a{color:var(--brand)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.bar input{flex:1 1 200px}
+label{display:block;margin:12px 0 4px;font-weight:500}
+.btn{border:0;border-radius:10px;padding:10px 16px;background:var(--brand);color:#fff;cursor:pointer;font-weight:500;text-decoration:none;display:inline-block}
+.btn.sec{background:var(--soft);color:var(--brand2)}
+.btn.del{background:var(--err)}
+.btn:disabled{opacity:.5}
+.btn.sm{padding:6px 12px;font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.sub{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:var(--ink);display:block}
+.sub:hover{border-color:var(--brand)}
+.sub .ic{font-size:1.8rem}
+.sub b{display:block;margin-top:6px}
+.sub small{color:var(--mute);direction:ltr;display:block;text-align:right}
+.sub .n{color:var(--brand);font-size:.85rem;margin-top:6px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px}
+.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:5px 12px;cursor:pointer}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.lec{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.lec h3{margin:0 0 2px;font-size:1.05rem}
+.lec .m{color:var(--mute);font-size:.85rem}
+.lec p{margin:6px 0 0;color:var(--mute)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.empty{text-align:center;color:var(--mute);padding:32px 12px;background:var(--card);border:1px dashed var(--line);border-radius:12px}
+.crumb{margin:0 0 12px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+#toast{position:fixed;inset-inline:12px;bottom:calc(14px + env(safe-area-inset-bottom));max-width:480px;margin:auto;padding:12px 16px;border-radius:10px;color:#fff;display:none;z-index:50}
+#toast.ok{background:var(--ok)}#toast.err{background:var(--err)}
+#reader{position:fixed;inset:0;background:var(--bg);z-index:40;display:none;flex-direction:column}
+#reader .top{display:flex;gap:8px;align-items:center;padding:10px;background:var(--brand2);color:#fff;padding-top:calc(10px + env(safe-area-inset-top))}
+#reader .top span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pages{flex:1;overflow:auto;padding:10px;background:#8a98a0;text-align:center}
+#pages .pg{background:#fff;margin:0 auto 10px;max-width:100%;box-shadow:0 1px 4px #0004}
+#pages canvas{width:100%;height:auto;display:block}
+.hint{font-size:.85rem;color:var(--mute)}
+footer{text-align:center;color:var(--mute);font-size:.8rem;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="in"><h1><a href="#/" style="color:#fff;text-decoration:none">📚 مكتبة محاضرات تقنيات المختبرات الطبية</a></h1><p>المرحلة الثانية</p></div></header>
+<main id="app"><div class="empty">جارٍ التحميل…</div></main>
+<footer><a href="#/admin">دخول المالك</a></footer>
+<div id="toast"></div>
+<div id="reader"><div class="top"><button class="btn sec sm" id="rclose">إغلاق ✕</button><span id="rtitle"></span><a class="btn sec sm" id="rdl">تنزيل</a></div><div id="pages"></div></div>
+
+<script>
+/* ===== الإعدادات: عدّل هذين السطرين فقط (انظر الدليل) ===== */
+const SUPABASE_URL = "https://ndhcylxgeucvmzkyhkvc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_eHMwzoX7k8Jm1K8lGN4DEA_CbsMskCP";
+/* ======================================================== */
+
+const MAX_MB = 50, BUCKET = "lectures";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtDate = d => new Date(d).toLocaleDateString("ar-IQ", {year:"numeric", month:"long", day:"numeric"});
+const fmtSize = b => b ? (b/1048576).toFixed(1) + " MB" : "";
+const norm = s => String(s||"").toLowerCase().trim();
+
+let sb = null, subjects = [], lectures = [], session = null, isAdmin = false;
+let q = "", filter = "all", editing = null, busy = false, loadError = "";
+
+function toast(msg, type="ok"){const t=$("#toast");t.textContent=msg;t.className=type;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",type==="ok"?3500:7000)}
+const fileUrl = (path, dl) => sb.storage.from(BUCKET).getPublicUrl(path, dl ? {download: true} : undefined).data.publicUrl;
+const subj = id => subjects.find(s => s.id === id);
+
+async function load(){
+  try{
+    const [a,b] = await Promise.all([
+      sb.from("subjects").select("*").order("sort"),
+      sb.from("lectures").select("*").order("created_at",{ascending:false})
+    ]);
+    if(a.error) throw a.error; if(b.error) throw b.error;
+    subjects = a.data; lectures = b.data; loadError = "";
+  }catch(e){ loadError = "تعذر تحميل البيانات. تأكد من الاتصال بالإنترنت ومن إعدادات الربط."; }
+}
+async function checkAdmin(){
+  isAdmin = false;
+  if(session){
+    const r = await sb.from("admins").select("user_id").eq("user_id", session.user.id).maybeSingle();
+    isAdmin = !!r.data;
+  }
+}
+
+/* ---------- العرض ---------- */
+function lecCard(l, admin){
+  const s = subj(l.subject_id);
+  return `<div class="lec"><h3>${esc(l.title)}</h3>
+  <div class="m">${s?esc(s.icon+" "+s.name_ar):""} · أضيفت ${fmtDate(l.created_at)} ${l.file_size?"· "+fmtSize(l.file_size):""}</div>
+  ${l.description?`<p>${esc(l.description)}</p>`:""}
+  <div class="acts">
+   <button class="btn sm" data-read="${l.id}">📖 قراءة</button>
+   <a class="btn sec sm" href="${fileUrl(l.file_path,true)}" download>⬇ تنزيل</a>
+   ${admin?`<button class="btn sec sm" data-edit="${l.id}">✏ تعديل</button><button class="btn del sm" data-del="${l.id}">🗑 حذف</button>`:""}
+  </div></div>`;
+}
+function searchBlock(){
+  return `<div class="bar"><input id="q" type="search" placeholder="🔎 ابحث عن محاضرة بالاسم…" value="${esc(q)}"></div>
+  <div class="chips"><span class="chip ${filter==="all"?"on":""}" data-f="all">كل المواد</span>${subjects.map(s=>`<span class="chip ${filter===s.id?"on":""}" data-f="${s.id}">${esc(s.name_ar)}</span>`).join("")}</div>`;
+}
+function filtered(){
+  return lectures.filter(l => (filter==="all"||l.subject_id===filter) && (!q || norm(l.title).includes(norm(q)) || norm(l.description).includes(norm(q))));
+}
+function viewHome(){
+  const searching = q || filter!=="all";
+  let h = `<h2>المواد الدراسية</h2>${searchBlock()}`;
+  if(searching){
+    const r = filtered();
+    h += r.length ? r.map(l=>lecCard(l)).join("") : `<div class="empty">لا توجد محاضرات مطابقة.</div>`;
+  } else {
+    h += `<div class="grid">${subjects.map(s=>{const n=lectures.filter(l=>l.subject_id===s.id).length;
+      return `<a class="sub" href="#/s/${s.id}"><span class="ic">${esc(s.icon)}</span><b>${esc(s.name_ar)}</b><small>${esc(s.name_en)}</small><div class="n">${n} محاضرة</div></a>`}).join("")}</div>`;
+  }
+  return h;
+}
+function viewSubject(id){
+  const s = subj(id); if(!s) return `<div class="empty">المادة غير موجودة.</div>`;
+  const r = lectures.filter(l=>l.subject_id===id && (!q || norm(l.title).includes(norm(q))));
+  return `<p class="crumb"><a href="#/">← كل المواد</a></p><h2>${esc(s.icon)} ${esc(s.name_ar)}</h2><div class="hint" dir="ltr" style="text-align:right">${esc(s.name_en)}</div>
+  <div class="bar" style="margin-top:12px"><input id="q" type="search" placeholder="🔎 ابحث في هذه المادة…" value="${esc(q)}"></div>
+  ${r.length ? r.map(l=>lecCard(l)).join("") : `<div class="empty">${q?"لا توجد نتائج مطابقة.":"لا توجد محاضرات في هذه المادة حتى الآن."}</div>`}`;
+}
+function viewAdmin(){
+  if(!session) return `<div class="panel"><h2>تسجيل دخول المالك</h2>
+   <label>البريد الإلكتروني</label><input id="em" type="email" autocomplete="username" dir="ltr">
+   <label>كلمة المرور</label><input id="pw" type="password" autocomplete="current-password" dir="ltr">
+   <label style="font-weight:400"><input type="checkbox" id="showpw" style="width:auto" onchange="document.getElementById('pw').type=this.checked?'text':'password'"> إظهار كلمة المرور</label>
+   <p><button class="btn" id="login">دخول</button></p></div>`;
+  if(!isAdmin) return `<div class="panel"><h2>غير مصرّح</h2><p>هذا الحساب ليس مالك المكتبة.</p><button class="btn sec" id="logout">تسجيل الخروج</button></div>`;
+  const e = editing ? lectures.find(l=>l.id===editing) : null;
+  const list = filtered();
+  return `<p class="crumb"><a href="#/">← المكتبة</a> · <a href="#" id="logout">تسجيل الخروج</a></p>
+  <div class="panel"><h2>${e?"تعديل محاضرة":"إضافة محاضرة"}</h2>
+   <label>المادة</label><select id="f-sub">${subjects.map(s=>`<option value="${s.id}" ${e&&e.subject_id===s.id?"selected":""}>${esc(s.name_ar)} — ${esc(s.name_en)}</option>`).join("")}</select>
+   <label>عنوان المحاضرة</label><input id="f-title" maxlength="200" value="${esc(e?.title)}">
+   <label>وصف (اختياري)</label><textarea id="f-desc" rows="2" maxlength="1000">${esc(e?.description)}</textarea>
+   <label>${e?"استبدال ملف PDF (اتركه فارغًا للإبقاء على الملف الحالي)":"ملف PDF (الحد الأقصى "+MAX_MB+" ميجابايت)"}</label>
+   <input id="f-file" type="file" accept="application/pdf,.pdf">
+   <p><button class="btn" id="save" ${busy?"disabled":""}>${busy?"جارٍ الحفظ…":(e?"حفظ التعديلات":"رفع المحاضرة")}</button>
+   ${e?` <button class="btn sec" id="cancel">إلغاء</button>`:""}</p></div>
+  <h2>كل المحاضرات (${lectures.length})</h2>${searchBlock()}
+  ${list.length?list.map(l=>lecCard(l,true)).join(""):`<div class="empty">لا توجد محاضرات.</div>`}`;
+}
+
+function render(keepFocus){
+  const h = location.hash || "#/";
+  const hadFocus = document.activeElement && document.activeElement.id === "q";
+  const pos = hadFocus ? document.activeElement.selectionStart : 0;
+  let html;
+  if(loadError) html = `<div class="empty">${esc(loadError)}<p><button class="btn" id="retry">إعادة المحاولة</button></p></div>`;
+  else if(h.startsWith("#/s/")) html = viewSubject(decodeURIComponent(h.slice(4)));
+  else if(h.startsWith("#/admin")) html = viewAdmin();
+  else html = viewHome();
+  $("#app").innerHTML = html;
+  if(hadFocus && $("#q")){ $("#q").focus(); try{$("#q").setSelectionRange(pos,pos)}catch(_){} }
+}
+
+/* ---------- الأحداث ---------- */
+document.addEventListener("input", e => { if(e.target.id==="q"){ q=e.target.value; render(); } });
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-read],[data-f],[data-edit],[data-del],button,a#logout"); if(!t) return;
+  if(t.dataset.f){ filter=t.dataset.f; render(); return; }
+  if(t.dataset.read){ openReader(lectures.find(l=>l.id===t.dataset.read)); return; }
+  if(t.dataset.edit){ editing=t.dataset.edit; render(); scrollTo(0,0); return; }
+  if(t.dataset.del){ delLecture(t.dataset.del); return; }
+  if(t.id==="retry"){ await load(); render(); }
+  if(t.id==="login") doLogin();
+  if(t.id==="logout"){ e.preventDefault(); await sb.auth.signOut(); }
+  if(t.id==="save") saveLecture();
+  if(t.id==="cancel"){ editing=null; render(); }
+});
+window.addEventListener("hashchange", () => { q=""; filter="all"; render(); scrollTo(0,0); });
+
+async function doLogin(){
+  const {error} = await sb.auth.signInWithPassword({email:$("#em").value.trim().toLowerCase(), password:$("#pw").value.trim()});
+  if(error){
+    const m = /invalid login credentials/i.test(error.message) ? "البريد أو كلمة المرور غير صحيحة." : error.message;
+    toast("فشل تسجيل الدخول: " + m + " (" + (error.status||"بدون اتصال") + ")","err");
+  } else toast("تم تسجيل الدخول بنجاح.");
+}
+
+async function validatePdf(f){
+  if(!f) return "اختر ملف PDF.";
+  if(!/\.pdf$/i.test(f.name) || (f.type && f.type!=="application/pdf")) return "الملف ليس PDF.";
+  if(f.size > MAX_MB*1048576) return `حجم الملف أكبر من ${MAX_MB} ميجابايت.`;
+  if(f.size < 100) return "الملف فارغ أو تالف.";
+  const head = await f.slice(0,5).text();
+  if(head !== "%PDF-") return "محتوى الملف ليس PDF صالحًا.";
+  return null;
+}
+const newPath = sid => `${sid}/${crypto.randomUUID()}.pdf`;
+const upload = (path,f) => sb.storage.from(BUCKET).upload(path, f, {contentType:"application/pdf", upsert:false});
+
+async function saveLecture(){
+  if(busy) return;
+  const sid=$("#f-sub").value, title=$("#f-title").value.trim(), desc=$("#f-desc").value.trim(), file=$("#f-file").files[0];
+  if(!title) return toast("اكتب عنوان المحاضرة.","err");
+  const e = editing ? lectures.find(l=>l.id===editing) : null;
+  if(file || !e){ const v = await validatePdf(file); if(v) return toast(v,"err"); }
+  busy=true; render();
+  try{
+    if(!e){
+      const path = newPath(sid);
+      let r = await upload(path,file); if(r.error) throw r.error;
+      r = await sb.from("lectures").insert({subject_id:sid,title,description:desc||null,file_path:path,file_size:file.size});
+      if(r.error){ await sb.storage.from(BUCKET).remove([path]); throw r.error; }
+      toast("تم رفع المحاضرة ونشرها بنجاح.");
+    } else {
+      const upd = {subject_id:sid,title,description:desc||null,updated_at:new Date().toISOString()};
+      let newFile=null, moved=null;
+      if(file){
+        newFile = newPath(sid);
+        const r = await upload(newFile,file); if(r.error) throw r.error;
+        upd.file_path=newFile; upd.file_size=file.size;
+      } else if(sid!==e.subject_id){
+        const np = newPath(sid);
+        const r = await sb.storage.from(BUCKET).move(e.file_path, np); if(r.error) throw r.error;
+        moved=np; upd.file_path=np;
+      }
+      const r = await sb.from("lectures").update(upd).eq("id",e.id);
+      if(r.error){
+        if(newFile) await sb.storage.from(BUCKET).remove([newFile]);
+        if(moved) await sb.storage.from(BUCKET).move(moved,e.file_path);
+        throw r.error;
+      }
+      if(newFile){ const d = await sb.storage.from(BUCKET).remove([e.file_path]); if(d.error) toast("تم الحفظ، لكن تعذر حذف الملف القديم.","err"); else toast("تم حفظ التعديلات واستبدال الملف."); }
+      else toast("تم حفظ التعديلات.");
+      editing=null;
+    }
+    await load();
+  }catch(err){ toast("فشلت العملية: "+(err.message||"خطأ غير معروف"),"err"); }
+  busy=false; render();
+}
+
+async function delLecture(id){
+  const l = lectures.find(x=>x.id===id); if(!l) return;
+  if(!confirm(`حذف المحاضرة «${l.title}» نهائيًا؟`)) return;
+  const r = await sb.from("lectures").delete().eq("id",id);
+  if(r.error) return toast("فشل الحذف: "+r.error.message,"err");
+  const d = await sb.storage.from(BUCKET).remove([l.file_path]);
+  toast(d.error ? "حُذفت المحاضرة لكن تعذر حذف ملفها من التخزين." : "تم حذف المحاضرة وملفها.", d.error?"err":"ok");
+  await load(); render();
+}
+
+/* ---------- قارئ PDF ---------- */
+let pdfjs=null;
+function loadPdfJs(){
+  if(pdfjs) return pdfjs;
+  pdfjs = new Promise((res,rej)=>{
+    const s=document.createElement("script");
+    s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(pdfjsLib)};
+    s.onerror=()=>rej(new Error("pdfjs"));
+    document.head.appendChild(s);
+  });
+  return pdfjs;
+}
+let readerToken=0;
+async function openReader(l){
+  if(!l) return;
+  const tok=++readerToken, box=$("#pages");
+  $("#reader").style.display="flex"; $("#rtitle").textContent=l.title; $("#rdl").href=fileUrl(l.file_path,true);
+  box.innerHTML='<p style="color:#fff">جارٍ فتح الملف…</p>'; document.body.style.overflow="hidden";
+  try{
+    const lib = await loadPdfJs();
+    const pdf = await lib.getDocument(fileUrl(l.file_path)).promise;
+    if(tok!==readerToken) return;
+    box.innerHTML="";
+    const first = await pdf.getPage(1);
+    const w = Math.min(box.clientWidth-20, 900);
+    const ratio = first.getViewport({scale:1}); const h = w*ratio.height/ratio.width;
+    const io = new IntersectionObserver(async ents=>{
+      for(const en of ents){ if(!en.isIntersecting) continue; io.unobserve(en.target);
+        const n=+en.target.dataset.n, p=await pdf.getPage(n);
+        const vp=p.getViewport({scale:1}), sc=(w/vp.width)*Math.min(devicePixelRatio||1,2), v2=p.getViewport({scale:sc});
+        const c=document.createElement("canvas"); c.width=v2.width; c.height=v2.height;
+        await p.render({canvasContext:c.getContext("2d"),viewport:v2}).promise;
+        if(tok===readerToken){ en.target.style.height="auto"; en.target.appendChild(c); } }
+    },{root:box,rootMargin:"600px"});
+    for(let i=1;i<=pdf.numPages;i++){ const d=document.createElement("div"); d.className="pg"; d.dataset.n=i; d.style.width=w+"px"; d.style.height=h+"px"; box.appendChild(d); io.observe(d); }
+  }catch(err){
+    box.innerHTML=`<div class="empty" style="margin:20px">تعذر عرض الملف داخل التطبيق.<p><a class="btn" target="_blank" rel="noopener" href="${fileUrl(l.file_path)}">فتح في صفحة جديدة</a></p></div>`;
+  }
+}
+$("#rclose").onclick=()=>{readerToken++;$("#reader").style.display="none";$("#pages").innerHTML="";document.body.style.overflow=""};
+
+/* ---------- التشغيل ---------- */
+async function init(){
+  if(SUPABASE_URL.startsWith("PUT_")){ $("#app").innerHTML='<div class="empty">لم يتم ضبط إعدادات الربط بعد. راجع دليل التشغيل (الخطوة 5).</div>'; return; }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const s = await sb.auth.getSession(); session = s.data.session; await checkAdmin();
+  sb.auth.onAuthStateChange(async (_e, sess) => { session = sess; await checkAdmin(); editing=null; render(); });
+  await load(); render();
+  const refresh = async () => { if(busy || editing || document.hidden || $("#reader").style.display==="flex") return; const a=document.activeElement; if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return; await load(); render(); };
+  document.addEventListener("visibilitychange", refresh);
+  setInterval(refresh, 90000);
+}
+init();
+if('serviceWorker' in navigator) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
